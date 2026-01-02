@@ -1,4 +1,5 @@
 import { FlashGridChallenge, validateFlashGridAnswer } from '../generators/flashGrid'
+import { FlashGridParams } from '../tiers'
 
 export interface FlashGridResult {
   score: number
@@ -59,11 +60,11 @@ export function scoreFlashGrid(
     details: {
       correct,
       total,
-      tier: Object.entries(require('../tiers').FLASH_GRID_TIERS)
+      tier: Number(Object.entries(require('../tiers').FLASH_GRID_TIERS as Record<string, FlashGridParams>)
         .find(([, params]) =>
           params.gridSize === challenge.params.gridSize &&
           params.tiles === challenge.params.tiles
-        )?.[0] as unknown as number || 3,
+        )?.[0]) || 3,
       gridSize: challenge.params.gridSize,
       tiles: challenge.params.tiles,
     },
