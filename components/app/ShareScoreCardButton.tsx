@@ -70,7 +70,7 @@ export function ShareScoreCardButton({
   }
 
   // Use native share on mobile if available
-  if (typeof navigator !== 'undefined' && navigator.share) {
+  if (typeof navigator !== 'undefined' && 'share' in navigator) {
     return (
       <Button onClick={handleNativeShare} variant="outline" size="sm">
         <Share2 className="h-4 w-4 mr-2" />
