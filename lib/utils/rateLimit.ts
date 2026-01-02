@@ -63,11 +63,11 @@ export function rateLimit(
 }
 
 function cleanupExpiredEntries(now: number) {
-  for (const [key, entry] of rateLimitStore.entries()) {
+  rateLimitStore.forEach((entry, key) => {
     if (now >= entry.resetTime) {
       rateLimitStore.delete(key)
     }
-  }
+  })
 }
 
 export function getRateLimitKey(request: Request, prefix: string = ''): string {

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { Suspense, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
@@ -11,10 +11,10 @@ import { createClient } from '@/lib/supabase/client'
 import { captureEvent } from '@/lib/analytics/posthog-client'
 import { EVENTS } from '@/lib/analytics/events'
 
-export default function LoginPage() {
+function LoginContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const redirect = searchParams.get('redirect') || '/app'
+  const redirect = searchParams.get('redirect') || '/dashboard'
 
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
@@ -151,5 +151,25 @@ export default function LoginPage() {
         </CardContent>
       </Card>
     </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-background p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <div className="flex items-center justify-center gap-2 mb-4">
+              <span className="text-4xl">🧠</span>
+            </div>
+            <CardTitle className="text-2xl">Welcome to Pattern League</CardTitle>
+            <CardDescription>Loading...</CardDescription>
+          </CardHeader>
+        </Card>
+      </div>
+    }>
+      <LoginContent />
+    </Suspense>
   )
 }

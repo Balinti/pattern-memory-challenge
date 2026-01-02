@@ -1,15 +1,15 @@
 'use client'
 
-import { useEffect } from 'react'
+import { Suspense, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { identifyUser, captureEvent } from '@/lib/analytics/posthog-client'
 import { EVENTS } from '@/lib/analytics/events'
 
-export default function CallbackPage() {
+function CallbackContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const redirect = searchParams.get('redirect') || '/app'
+  const redirect = searchParams.get('redirect') || '/dashboard'
 
   useEffect(() => {
     const handleCallback = async () => {
@@ -51,5 +51,20 @@ export default function CallbackPage() {
         <p className="text-muted-foreground">Signing you in...</p>
       </div>
     </div>
+  )
+}
+
+export default function CallbackPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center">
+          <div className="text-4xl mb-4 animate-pulse">🧠</div>
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    }>
+      <CallbackContent />
+    </Suspense>
   )
 }
