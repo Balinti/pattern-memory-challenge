@@ -89,24 +89,29 @@ export async function POST(request: NextRequest) {
 
   // Regenerate challenge to validate
   let scoreResult
-  const durationMs = getDurationFromEvents(result.events)
 
   switch (result.mode) {
     case 'flash_grid': {
+      const durationMs = getDurationFromEvents(result.events)
       const regenerated = generateFlashGridChallenge(challenge.seed, challenge.tier)
       scoreResult = scoreFlashGrid(regenerated, result.answers, durationMs)
       break
     }
     case 'sequence_forge': {
+      const durationMs = getDurationFromEvents(result.events)
       const regenerated = generateSequenceForgeChallenge(challenge.seed, challenge.tier)
       scoreResult = scoreSequenceForge(regenerated, result.answers, durationMs)
       break
     }
     case 'rotation_run': {
+      const durationMs = getDurationFromEvents(result.events)
       const regenerated = generateRotationRunChallenge(challenge.seed, challenge.tier)
       scoreResult = scoreRotationRun(regenerated, result.answers, durationMs)
       break
     }
+    case 'weekly_run':
+      // Weekly run is handled by a separate endpoint
+      return NextResponse.json({ error: 'Use /api/attempts/submit-weekly for weekly runs' }, { status: 400 })
     default:
       return NextResponse.json({ error: 'Invalid mode' }, { status: 400 })
   }
