@@ -68,13 +68,13 @@ export async function GET(request: NextRequest) {
 
     switch (mode) {
       case 'flash_grid':
-        params = generateFlashGridChallenge(seed, tier).params as Record<string, unknown>
+        params = generateFlashGridChallenge(seed, tier).params as unknown as Record<string, unknown>
         break
       case 'sequence_forge':
-        params = generateSequenceForgeChallenge(seed, tier).params as Record<string, unknown>
+        params = generateSequenceForgeChallenge(seed, tier).params as unknown as Record<string, unknown>
         break
       case 'rotation_run':
-        params = generateRotationRunChallenge(seed, tier).params as Record<string, unknown>
+        params = generateRotationRunChallenge(seed, tier).params as unknown as Record<string, unknown>
         break
     }
 
