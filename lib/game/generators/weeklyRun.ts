@@ -14,7 +14,7 @@ export function generateWeeklyRunChallenge(seed: string, tier: number): WeeklyRu
   const rng = createRng(seed)
 
   // Pick a random transform for rotation run
-  const transform = pickRandom(TRANSFORMS, rng)
+  const transform = pickRandom([...TRANSFORMS], rng)
 
   // Create modified rotation run params with random transform
   const rotationParams = { ...getRotationRunParams(tier), transform }
