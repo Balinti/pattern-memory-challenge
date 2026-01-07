@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { Suspense, useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
@@ -9,7 +9,7 @@ import { Separator } from '@/components/ui/separator'
 import { createClient } from '@/lib/supabase/client'
 import { Crown, ExternalLink, LogOut } from 'lucide-react'
 
-export default function SettingsPage() {
+function SettingsContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const checkout = searchParams.get('checkout')
@@ -18,6 +18,7 @@ export default function SettingsPage() {
 
   const [loading, setLoading] = useState(true)
   const [portalLoading, setPortalLoading] = useState(false)
+  const [subscriptionsAvailable, setSubscriptionsAvailable] = useState(false)
   const [entitlement, setEntitlement] = useState<{
     plan: string
     status: string
@@ -26,6 +27,7 @@ export default function SettingsPage() {
 
   useEffect(() => {
     fetchEntitlement()
+    checkSubscriptionsAvailable()
   }, [])
 
   const fetchEntitlement = async () => {
@@ -45,6 +47,16 @@ export default function SettingsPage() {
       setEntitlement(data)
     }
     setLoading(false)
+  }
+
+  const checkSubscriptionsAvailable = async () => {
+    try {
+      const res = await fetch('/api/stripe/checkout', { method: 'POST', body: JSON.stringify({ price_key: 'weekly' }) })
+      // 503 means not available, 401 means available but not authed (which is fine)
+      setSubscriptionsAvailable(res.status !== 503)
+    } catch {
+      setSubscriptionsAvailable(false)
+    }
   }
 
   const handleManageSubscription = async () => {
@@ -152,7 +164,7 @@ export default function SettingsPage() {
               {portalLoading ? 'Loading...' : 'Manage Subscription'}
               <ExternalLink className="h-4 w-4 ml-2" />
             </Button>
-          ) : (
+          ) : subscriptionsAvailable ? (
             <Button
               onClick={() => router.push('/pricing')}
               className="w-full"
@@ -160,7 +172,7 @@ export default function SettingsPage() {
               <Crown className="h-4 w-4 mr-2" />
               Upgrade to League+
             </Button>
-          )}
+          ) : null}
         </CardContent>
       </Card>
 
@@ -180,5 +192,18 @@ export default function SettingsPage() {
         </CardContent>
       </Card>
     </div>
+  )
+}
+
+export default function SettingsPage() {
+  return (
+    <Suspense fallback={
+      <div className="max-w-lg mx-auto">
+        <div className="h-8 w-32 bg-muted animate-pulse rounded mb-4" />
+        <div className="h-48 bg-muted animate-pulse rounded" />
+      </div>
+    }>
+      <SettingsContent />
+    </Suspense>
   )
 }

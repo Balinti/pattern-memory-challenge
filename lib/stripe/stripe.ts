@@ -23,6 +23,10 @@ export const stripe = {
   get webhooks() { return getStripe().webhooks },
 }
 
+export function hasStripePrices(): boolean {
+  return !!(process.env.STRIPE_PRICE_WEEKLY_ID && process.env.STRIPE_PRICE_ANNUAL_ID)
+}
+
 export async function createCheckoutSession(
   userId: string,
   email: string,
@@ -31,8 +35,12 @@ export async function createCheckoutSession(
   cancelUrl: string
 ): Promise<string> {
   const priceId = priceKey === 'weekly'
-    ? process.env.STRIPE_PRICE_WEEKLY_ID!
-    : process.env.STRIPE_PRICE_ANNUAL_ID!
+    ? process.env.STRIPE_PRICE_WEEKLY_ID
+    : process.env.STRIPE_PRICE_ANNUAL_ID
+
+  if (!priceId) {
+    throw new Error('Stripe price IDs not configured')
+  }
 
   const session = await stripe.checkout.sessions.create({
     mode: 'subscription',
@@ -48,10 +56,12 @@ export async function createCheckoutSession(
       trial_period_days: 7,
       metadata: {
         user_id: userId,
+        app_name: 'pattern-memory-challenge',
       },
     },
     metadata: {
       user_id: userId,
+      app_name: 'pattern-memory-challenge',
     },
     success_url: successUrl,
     cancel_url: cancelUrl,

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { createCheckoutSession } from '@/lib/stripe/stripe'
+import { createCheckoutSession, hasStripePrices } from '@/lib/stripe/stripe'
 import { z } from 'zod'
 
 const checkoutSchema = z.object({
@@ -8,6 +8,11 @@ const checkoutSchema = z.object({
 })
 
 export async function POST(request: NextRequest) {
+  // Check if Stripe prices are configured
+  if (!hasStripePrices()) {
+    return NextResponse.json({ error: 'Subscriptions not available' }, { status: 503 })
+  }
+
   const supabase = await createClient()
 
   const { data: { user }, error: authError } = await supabase.auth.getUser()
@@ -33,8 +38,8 @@ export async function POST(request: NextRequest) {
       user.id,
       user.email || '',
       price_key,
-      `${appUrl}/app/settings?checkout=success`,
-      `${appUrl}/app/settings?checkout=canceled`
+      `${appUrl}/settings?checkout=success`,
+      `${appUrl}/settings?checkout=canceled`
     )
 
     return NextResponse.json({ url })

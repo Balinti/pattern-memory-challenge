@@ -6,6 +6,9 @@ import { Check } from 'lucide-react'
 import { PLANS, formatPrice, calculateSavings } from '@/lib/stripe/plans'
 
 export default function PricingPage() {
+  const hasSubscriptions = !!(process.env.STRIPE_PRICE_WEEKLY_ID && process.env.STRIPE_PRICE_ANNUAL_ID)
+  const displayPlans = hasSubscriptions ? PLANS : PLANS.filter(p => p.key === 'free')
+
   const weeklyPlan = PLANS.find(p => p.key === 'weekly')!
   const annualPlan = PLANS.find(p => p.key === 'annual')!
   const savings = calculateSavings(weeklyPlan, annualPlan)
@@ -36,8 +39,8 @@ export default function PricingPage() {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-          {PLANS.map((plan) => (
+        <div className={`grid gap-8 max-w-5xl mx-auto ${displayPlans.length === 1 ? 'max-w-md' : displayPlans.length === 2 ? 'md:grid-cols-2' : 'md:grid-cols-3'}`}>
+          {displayPlans.map((plan) => (
             <Card
               key={plan.key}
               className={plan.popular ? 'border-primary shadow-lg relative' : ''}
